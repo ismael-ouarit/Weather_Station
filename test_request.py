@@ -12,5 +12,5 @@ data = {
     }
 }
 
-response = requests.post("http://127.0.0.1:8080/send-to-bigquery", json=data)
+response = requests.post("https://weather-station-app-691588068776.europe-west6.run.app/send-to-bigquery", json=data)
 print(response.status_code, response.text)
