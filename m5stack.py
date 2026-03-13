@@ -14,7 +14,7 @@ screen.set_screen_bg_color(0xd5d5d5)
 env3_0 = unit.get(unit.ENV3, unit.PORTA)
 temp_flag = 300
 
-passwd = "<YOUR_PASSWORD>"
+passwd = "<THIS_MY_PASS>"
 h = hashlib.sha256(passwd)
 passwd_hash = binascii.hexlify(h.digest())
 
@@ -41,7 +41,7 @@ while True:
             "indoor_humidity": round(env3_0.humidity)
         }
     }
-    urequests.post("<URL_FROM_CLOUDRUN>/send-to-bigquery", json=data)
+    urequests.post("https://weather-station-app-691588068776.europe-west6.run.app/send-to-bigquery", json=data)
     temp_flag = 0
   temp_flag += 1 # counter for the 300 seconds wait to update the temperature info.
   wait(1)
