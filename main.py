@@ -17,6 +17,20 @@ YOUR_HASH_PASSWD = "51a135add736e302e3337f3f79823413105e75ba33cecf66d1e5f76bc3e5
 
 app = Flask(__name__)
 
+# OpenWeather API config
+API_KEY = "e745148a9822f0136e732477cac53d64"
+CITY = "Lausanne"
+WEATHER_URL = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
+
+def get_outdoor_data():
+    response = requests.get(WEATHER_URL)
+    weather_data = response.json()
+    return {
+        "outdoor_temp": weather_data["main"]["temp"],
+        "outdoor_humidity": weather_data["main"]["humidity"],
+        "outdoor_weather": weather_data["weather"][0]["description"]
+    }
+
 # get the column names of the db
 q = """
 SELECT * FROM `weather-station-490015.IoT_Dataset.weather-records` LIMIT 10
@@ -26,15 +40,16 @@ df = query_job.to_dataframe()
 #%%
 @app.route('/send-to-bigquery', methods=['GET', 'POST'])
 def send_to_bigquery():
+    if request.method == 'GET':
+        return get_outdoor_data()
+
     if request.method == 'POST':
         if request.get_json(force=True)["passwd"] != YOUR_HASH_PASSWD:
             raise Exception("Incorrect Password!")
         data = request.get_json(force=True)["values"]
         # For exercise 2: Call the openweatherapi and add the resulting 
         # values to the `data` dictionary
-        # data["outdoor_temp"] = ...
-        # data["outdoor_humidity"] = ...
-        # data["weather"] = ...
+        data.update(get_outdoor_data())
         # building the query
         q = """INSERT INTO `weather-station-490015.IoT_Dataset.weather-records` 
         """
@@ -56,13 +71,19 @@ def send_to_bigquery():
     return {"status": "failed"}
         
 
-# For exercise 3: Complete the following endpoint.
-# @app.route('/get_outdoor_weather', methods=['GET', 'POST'])
-# def get_outdoor_weather():
-#     if request.method == 'POST':
-#         if request.get_json(force=True)["passwd"] != YOUR_HASH_PASSWD:
-#             raise Exception("Incorrect Password!")
-#         # get the latest outdoor temp values from the db
+
+@app.route('/get_outdoor_weather', methods=['GET', 'POST'])
+def get_outdoor_weather():
+    if request.method == 'POST':
+        if request.get_json(force=True)["passwd"] != YOUR_HASH_PASSWD:
+            raise Exception("Incorrect Password!")
+        # get the latest outdoor temp values from the db
+        q = """
+        SELECT * FROM `weather-station-490015.IoT_Dataset.weather-records` ORDER BY date DESC LIMIT 1
+        """
+        query_job = client.query(q)
+        df = query_job.to_dataframe()
+        return df.to_dict(orient='records')[0]
 
 
 if __name__ == '__main__':

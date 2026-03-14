@@ -5,10 +5,10 @@ YOUR_HASH_PASSWD = "51a135add736e302e3337f3f79823413105e75ba33cecf66d1e5f76bc3e5
 data = {
     "passwd": YOUR_HASH_PASSWD,
     "values": {
-        "date": "2025-03-13",
+        "date": "2025-03-15",
         "time": "16:30:00",
-        "indoor_temp": 23,
-        "indoor_humidity": 67
+        "indoor_temp": 15,
+        "indoor_humidity": 70
     }
 }
 
